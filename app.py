@@ -35,8 +35,10 @@ while True:
 
         # for each landmark, plot and write number
         for landmark_num, xy in enumerate(landmarks_list, start=1):
-            cv2.circle(img, (xy[0], xy[1]), 12, (168, 0, 20), -1)
-            cv2.putText(img, str(landmark_num),(xy[0]-7,xy[1]+5), cv2.FONT_HERSHEY_SIMPLEX, 0.4,(255,255,255), 1)
+            # image = cv2.circle(image, center_coordinates, radius, color, thickness)
+            # cv2.circle(img, (xy[0], xy[1]), 5, (168, 0, 20), -1)
+            cv2.circle(img, (xy[0], xy[1]), 2, (0,255,255), -1)
+            # cv2.putText(img, str(landmark_num),(xy[0]-7,xy[1]+5), cv2.FONT_HERSHEY_SIMPLEX, 0.4,(255,255,255), 1)
 
 
     # visualise the image with landmarks
