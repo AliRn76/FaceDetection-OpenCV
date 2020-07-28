@@ -14,6 +14,7 @@ video_capture = cv2.VideoCapture(0)
 number = 0
 while True:
     ret, img = video_capture.read()
+    img = cv2.flip(img, 1)
     # convert to grayscale
     img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
