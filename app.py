@@ -1,6 +1,7 @@
 import cv2
 import dlib
-import sys
+import time
+import numpy as np
 
 
 # set up the 68 point facial landmark detector
@@ -9,9 +10,13 @@ predictor = dlib.shape_predictor("shape_predictor_68_face_landmarks.dat")
 
 video_capture = cv2.VideoCapture(0)
 
-# bring in the input image
-# img = cv2.imread('pic.jpg', 1)
-number = 0
+time.sleep(3)
+background = 0
+for i in range(30):
+    ret, background = video_capture.read()
+
+background = cv2.flip(background, 1)
+
 while True:
     ret, img = video_capture.read()
     img = cv2.flip(img, 1)
@@ -21,10 +26,11 @@ while True:
     # detect faces in the image
     faces_in_image = detector(img_gray, 0)
 
-
-
     # loop through each face in image
     for face in faces_in_image:
+        points = []
+        points1 = []
+        points2 = []
 
         # assign the facial landmarks
         landmarks = predictor(img_gray, face)
@@ -36,22 +42,30 @@ while True:
 
         # for each landmark, plot and write number
         for landmark_num, xy in enumerate(landmarks_list, start=1):
-            # image = cv2.circle(image, center_coordinates, radius, color, thickness)
-            # cv2.circle(img, (xy[0], xy[1]), 5, (168, 0, 20), -1)
-            cv2.circle(img, (xy[0], xy[1]), 2, (0,255,255), -1)
-            # cv2.putText(img, str(landmark_num),(xy[0]-7,xy[1]+5), cv2.FONT_HERSHEY_SIMPLEX, 0.4,(255,255,255), 1)
+          # We just want the border of face
+            if landmark_num < 18:
+                points1.append((xy[0], xy[1]))
+            elif landmark_num <= 27:
+                points2.append((xy[0], xy[1]))
 
+        points2.reverse()
+        points = points1 + points2
+        nds = np.array(points)
+        nds = np.int32([nds])
 
-    # visualise the image with landmarks
-    cv2.imshow('Video', img)
-    # number = number+1
-    # print(number)
-    # cv2.imwrite('img'+ str(number) +'.jpg', img)
+        mask = np.zeros(img.shape, dtype=np.uint8)
+        channel_count = img.shape[2]
+        ignore_mask_color = (255,) * channel_count
+        cv2.fillPoly(mask, nds, ignore_mask_color)
+        masked_image = cv2.bitwise_and(img, mask)
+        # I Don't know why it can't merge them well :\
+        dst = cv2.addWeighted(background, 1, masked_image, 1, 0)
+
+    cv2.imshow('Video', dst)
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
+
 video_capture.release()
-# cv2.waitKey(0)
-# cv2.destroyAllWindows()
 
 
 
@@ -59,9 +73,10 @@ video_capture.release()
 
 
 
-#
-# cascPath = sys.argv[1]
-# faceCascade = cv2.CascadeClassifier(cascPath)
+
+# # cascPath = sys.argv[1]
+# # faceCascade = cv2.CascadeClassifier(cascPath)
+# faceCascade = cv2.CascadeClassifier("haarcascade_frontalface_default.xml")
 # video_capture = cv2.VideoCapture(0)
 # detector = dlib.get_frontal_face_detector()
 # predictor = dlib.shape_predictor("shape_predictor_68_face_landmarks.dat")
